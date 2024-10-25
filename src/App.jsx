@@ -1,36 +1,34 @@
 import { useEffect, useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import { deleteTodo, getTodos, patchTodo, postTodo } from "./api/api.js";
 import "./App.css";
-import axios from "axios";
 
 function App() {
   const [todoList, setTodoList] = useState([]);
   const [newTodo, setNewTodo] = useState("");
   useEffect(() => {
-    axios.get("http://localhost:3000/todos").then((res) => {
-      setTodoList(res.data);
+    getTodos().then((data) => {
+      setTodoList(data);
     });
   }, [setTodoList]);
-
   const handleChange = (index, item) => {
     setTodoList((list) => {
-      list[index]["done"] = !list[index]["done"];
+      list[index]["completed"] = !list[index]["completed"];
       return [...list];
     });
-    axios.patch(`http://localhost:3000/todos/${item["id"]}`, {
-      done: !item["done"],
+    patchTodo(item["id"], {
+      task_name: item["task_name"],
+      completed: !item["completed"],
     });
   };
   const handleClearTodos = () => {
     setTodoList((currentList) => {
       const newList = currentList.filter((item) => {
-        console.log(item["done"]);
-        return !item["done"];
+        console.log(item["completed"]);
+        return !item["completed"];
       });
       todoList.forEach((item) => {
-        if (item["done"]) {
-          axios.delete(`http://localhost:3000/todos/${item["id"]}`);
+        if (item["completed"]) {
+          deleteTodo(item["id"]);
         }
       });
 
@@ -39,9 +37,10 @@ function App() {
   };
   const handleSubmit = (e) => {
     setTodoList((currentList) => {
-      return [...currentList, { title: newTodo, done: false }];
+      return [...currentList, { task_name: newTodo, completed: false }];
     });
-    axios.post("http://localhost:3000/todos", { title: newTodo, done: false });
+
+    postTodo({ task_name: newTodo, completed: false });
   };
   const handleInputChange = (e) => {
     setNewTodo(e.target.value);
@@ -53,8 +52,9 @@ function App() {
         {todoList.map((item, index) => {
           return (
             <li key={item.id}>
-              {item.title}
+              {item.task_name}
               <input
+                {...(item.completed ? { checked: true } : {})}
                 type="checkbox"
                 onChange={(e) => {
                   handleChange(index, item);
