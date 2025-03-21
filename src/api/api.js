@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const todoApi = axios.create({
-  baseURL: "http://127.0.0.1:5000",
+  baseURL: "http://127.0.0.1:9090",
   timeout: 1000,
   headers: {
     "Content-Type": "application/json",
